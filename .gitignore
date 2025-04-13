@@ -7,4 +7,5 @@
 **/*.bin
 **/*.sqlite
 **/*.sqlite3
-**/*.__pycache__/*
+**/*.cpython-312.pyc
+**/__pycache__/
