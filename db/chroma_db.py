@@ -30,7 +30,11 @@ class ChromaDB:
                 allow_reset=True
             )
         )
-        
+        self.collection_data_to_include = [
+            'documents',
+            'embeddings',
+            'metadatas',
+        ]
         # Use default embedding function (all-MiniLM-L6-v2)
         self.embedding_function = embedding_functions.DefaultEmbeddingFunction()
         
@@ -44,26 +48,18 @@ class ChromaDB:
         try:
             # Get or create memories collection
             self.memories = self.client.get_or_create_collection(
-                name="memories",
-                embedding_function=self.embedding_function,
-                metadata={
-                    "hnsw:space": "cosine",
-                    "description": "Collection for storing memories with text, image, and metadata",
-                    "schema": {
-                        "doc_id": "string",
-                        "text": "string",
-                        "image": "string",
-                        "embedding": "float[]",
-                        "metadata": "json"
-                    }
-                }
-            )
-            
-            # Get or create user_memories collection
-            self.user_memories = self.client.get_or_create_collection(
-                name="user_memories",
-                embedding_function=self.embedding_function,
-                metadata={"hnsw:space": "cosine"}
+                name="memories"
+                # metadata={
+                #     "hnsw:space": "cosine",
+                #     "description": "Collection for storing memories with text, image, and metadata",
+                #     "schema": {
+                #         "doc_id": "string",
+                #         "text": "string",
+                #         "image": "string",
+                #         "embedding": "float[]",
+                #         "metadata": "json"
+                #     }
+                # }
             )
             
             logger.info("Collections initialized successfully")
@@ -73,7 +69,7 @@ class ChromaDB:
     
     def add_memory(self, record: Dict[str, Any]) -> str:
         """
-        Add a memory to the database
+        Add a new memory to the database
         
         Args:
             doc_id (str): Unique identifier for the memory
@@ -86,34 +82,41 @@ class ChromaDB:
             str: ID of the added memory
         """
         try:
-            # If no embedding provided, generate one from the text
-            if embedding is None:
-                embedding = self.embedding_function([text])[0]
+            # Validate required fields
+            if record.get('embedding') is None:
+                raise ValueError("Embedding is required")
             
-            # Prepare metadata
-            full_metadata = {
-                "doc_id": doc_id,
-                "text": text,
-                "image": image,
-                "metadata": json.dumps(metadata) if isinstance(metadata, dict) else "{}"
-            }
+            # Ensure embedding is a list of floats
+            embedding = record.get('embedding')
+            if isinstance(embedding, np.ndarray):
+                embedding = embedding.tolist()
+            elif not isinstance(embedding, list):
+                raise ValueError("Embedding must be a list of floats or a numpy array")
+            
+            doc_id = record.get('doc_id')
+            if not doc_id:
+                raise ValueError("doc_id is required")
+            
+            # Prepare metadata - flatten nested dictionaries and convert all values to strings
+            metadata = record.get('metadata', {})
+            if not isinstance(metadata, dict):
+                metadata = {}
             
             # Add the record to the memories collection
             self.memories.add(
-                documents=[text],
+                documents=[record.get('text', '')],
                 embeddings=[embedding],
                 ids=[doc_id],
-                metadatas=[full_metadata]
+                metadatas=[metadata]
             )
             
             logger.info(f"Inserted record with ID: {doc_id}")
             return doc_id
         except Exception as e:
             logger.error(f"Error inserting record: {str(e)}")
-            raise 
+            raise
     
-    
-    def search_memories(self, query: str, n_results: int = 5) -> List[Dict[str, Any]]:
+    def search_memories(self, query: str, query_embedding_function: embedding_functions.EmbeddingFunction, n_results: int = 5) -> List[Dict[str, Any]]:
         """
         Search for memories similar to the query
         
@@ -125,9 +128,15 @@ class ChromaDB:
             List[Dict[str, Any]]: List of similar memories with their metadata
         """
         try:
+
+            # Use the embedding function to generate embeddings for the query
+            query_embedding = query_embedding_function(query)
+            
+            # Search using the embedding
             results = self.memories.query(
-                query_texts=[query],
-                n_results=n_results
+                query_embeddings=query_embedding,
+                n_results=n_results,
+                include=['embeddings', 'documents', 'metadatas', 'distances']
             )
             
             # Format results
@@ -160,13 +169,12 @@ class ChromaDB:
             Optional[Dict[str, Any]]: Memory data if found, None otherwise
         """
         try:
-            result = self.memories.get(ids=[doc_id])
+            result = self.memories.get(ids=[doc_id], include=self.collection_data_to_include)
             if result['ids']:
                 metadata = result['metadatas'][0]
                 return {
                     'doc_id': metadata.get('doc_id', result['ids'][0]),
-                    'text': metadata.get('text', result['documents'][0]),
-                    'image': metadata.get('image', ''),
+                    'document': metadata.get('document', result['documents'][0]),
                     'embedding': result['embeddings'][0] if 'embeddings' in result else None,
                     'metadata': json.loads(metadata.get('metadata', '{}'))
                 }
@@ -203,15 +211,14 @@ class ChromaDB:
             List[Dict[str, Any]]: List of all memories
         """
         try:
-            results = self.memories.get()
+            results = self.memories.get(include=self.collection_data_to_include)
             
             formatted_results = []
             for i in range(len(results['ids'])):
                 metadata = results['metadatas'][i]
                 formatted_results.append({
                     'doc_id': metadata.get('doc_id', results['ids'][i]),
-                    'text': metadata.get('text', results['documents'][i]),
-                    'image': metadata.get('image', ''),
+                    'document': metadata.get('document', results['documents'][i]),
                     'embedding': results['embeddings'][i] if 'embeddings' in results else None,
                     'metadata': json.loads(metadata.get('metadata', '{}'))
                 })
@@ -231,3 +238,11 @@ class ChromaDB:
         except Exception as e:
             logger.error(f"Error resetting database: {str(e)}")
             raise
+
+    def delete_collection(self, collection_name: str):
+        """Delete a collection by name"""
+        try:
+            self.client.delete_collection(name=collection_name)
+            logger.info(f"Collection {collection_name} deleted successfully")
+        except Exception as e:
+            logger.error(f"Error deleting collection: {str(e)}")

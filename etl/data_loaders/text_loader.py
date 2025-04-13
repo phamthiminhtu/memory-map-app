@@ -1,4 +1,4 @@
-from .base_loader import BaseDataLoader
+from etl.data_loaders.base_loader import BaseDataLoader
 from sentence_transformers import SentenceTransformer
 import numpy as np
 from typing import Dict, Any
@@ -9,7 +9,7 @@ class TextDataLoader(BaseDataLoader):
         super().__init__(vector_db)
         self.model = SentenceTransformer(model_name)
     
-    def process_data(self, text_path: str) -> np.ndarray:
+    def process_data(self, text: str) -> np.ndarray:
         """
         Process text data and return embeddings
         
@@ -19,8 +19,6 @@ class TextDataLoader(BaseDataLoader):
         Returns:
             np.ndarray: Text embeddings
         """
-        with open(text_path, 'r', encoding='utf-8') as f:
-            text = f.read()
         
         # Clean and preprocess text
         cleaned_text = clean_text(text)
@@ -35,6 +33,16 @@ class TextDataLoader(BaseDataLoader):
         if len(embeddings.shape) > 1:
             embeddings = np.mean(embeddings, axis=0)
         
+        return embeddings
+
+    def generate_query_embedding(self, query: str):
+        """
+        Generate an embedding for a query using the embedding function
+        
+        Args:
+            query (str): The query to generate an embedding for
+        """
+        embeddings = self.process_data(text=query)
         return embeddings
     
     def save_text_memory(self, text_path: str, metadata: Dict[str, Any] = None):
