@@ -4,3 +4,5 @@ chromadb
 Pillow
 torch
 transformers
+openai-clip
+torchvision

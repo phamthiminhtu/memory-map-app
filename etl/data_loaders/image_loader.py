@@ -1,15 +1,15 @@
-from .base_loader import BaseDataLoader
+from etl.data_loaders.base_loader import BaseDataLoader
 from PIL import Image
 import torch
-from transformers import AutoImageProcessor, AutoModel
+# from transformers import AutoImageProcessor, AutoModel
 import numpy as np
+import clip
 from typing import Dict, Any
 
 class ImageDataLoader(BaseDataLoader):
-    def __init__(self, vector_db, model_name: str = "microsoft/resnet-50"):
+    def __init__(self, vector_db, model_name: str = "ViT-B/32"):
         super().__init__(vector_db)
-        self.processor = AutoImageProcessor.from_pretrained(model_name)
-        self.model = AutoModel.from_pretrained(model_name)
+        self.model, self.processor = clip.load(model_name)
     
     def process_data(self, image_path: str) -> np.ndarray:
         """
@@ -22,17 +22,28 @@ class ImageDataLoader(BaseDataLoader):
             np.ndarray: Image embeddings
         """
         # Load and preprocess image
-        image = Image.open(image_path)
-        inputs = self.processor(image, return_tensors="pt")
+        image = Image.open(image_path).convert("RGB")
+        image_input = self.processor(image).unsqueeze(0)
         
         # Generate embeddings
         with torch.no_grad():
-            outputs = self.model(**inputs)
+            image_embedding = self.model.encode_image(image_input).squeeze().numpy().tolist()
         
-        # Get the pooled output (usually the [CLS] token embedding)
-        embeddings = outputs.last_hidden_state.mean(dim=1).numpy()
+        return image_embedding
+    
+    def generate_query_embedding(self, query: str):
+        """
+        Generate an embedding for a query using the embedding function
         
-        return embeddings
+        Args:
+            query (str): The query to generate an embedding 
+            model (Any): The model to use for embedding generation
+        """
+        tokenized_query = clip.tokenize(query)
+        query_embedding_tensor = self.model.encode_text(tokenized_query)
+        query_embedding = query_embedding_tensor.detach().numpy().tolist()
+        
+        return query_embedding
     
     def save_image_memory(self, image_path: str, metadata: Dict[str, Any] = None):
         """
@@ -49,10 +60,8 @@ class ImageDataLoader(BaseDataLoader):
         metadata['type'] = 'image'
         metadata['source'] = image_path
         
-
-        
         # Process image and get embeddings
-        embeddings = self.process_data(image_path)
+        embedding = self.process_data(image_path)
         
         # Save to vector DB with structured format
-        self.save_memory(embeddings, metadata) 
+        self.save_memory(embedding=embedding, metadata=metadata) 

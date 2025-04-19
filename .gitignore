@@ -1,0 +1,10 @@
+**/*.DS_Store
+**/*.venv
+**/*.env
+**/*.idea
+**/*.pytest_cache
+**/*.pytest_cache
+**/*.bin
+**/*.sqlite
+**/*.sqlite3
+**/__pycache__/*

@@ -13,6 +13,16 @@ class BaseDataLoader(ABC):
         """Process the data and return embeddings"""
         pass
     
+    @abstractmethod
+    def generate_query_embedding(self, query: str):
+        """
+        Generate an embedding for a query using the embedding function
+        
+        Args:
+            query (str): The query to generate an embedding for
+        """
+        pass
+    
     def _generate_doc_id(self, text: Optional[str] = None, file_path: Optional[str] = None) -> str:
         """Generate a unique document ID based on content or file path"""
         if text:
@@ -47,14 +57,13 @@ class BaseDataLoader(ABC):
         # Create structured record
         record = {
             'doc_id': doc_id,
-            'text': text,
-            'image': image,
+            'document': text if text else image,
             'embedding': embedding,
             'metadata': metadata  # Store full metadata for reference
         }
-        
+
         # Save to vector DB
-        self.vector_db.add_memory(record)
+        self.vector_db.add_memory(record=record)
     
     def load_memories(self, query_embedding: np.ndarray, k: int = 5) -> List[Dict[str, Any]]:
         """Load k most similar memories"""
