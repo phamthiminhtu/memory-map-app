@@ -220,7 +220,7 @@ class ChromaDB:
                     'doc_id': metadata.get('doc_id', results['ids'][i]),
                     'document': metadata.get('document', results['documents'][i]),
                     'embedding': results['embeddings'][i] if 'embeddings' in results else None,
-                    'metadata': json.loads(metadata.get('metadata', '{}'))
+                    'metadata': metadata  # Return the metadata directly
                 })
             
             logger.info(f"Retrieved {len(formatted_results)} memories")

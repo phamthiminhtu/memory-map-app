@@ -8,18 +8,27 @@ class TextDataLoader(BaseDataLoader):
     def __init__(self, vector_db, model_name: str = "all-MiniLM-L6-v2"):
         super().__init__(vector_db)
         self.model = SentenceTransformer(model_name)
-    
+
+    def load_text(self, text_path: str = None, text: str = None) -> str:
+        if text_path is not None:
+            with open(text_path, 'r') as file:
+                text = file.read()
+        elif text is None:
+            raise ValueError("Either text_path or text must be provided")
+        return text
+
     def process_data(self, text: str) -> np.ndarray:
         """
         Process text data and return embeddings
         
         Args:
-            text_path (str): Path to the text file
+            text_path (str, optional): Path to the text file
+            text (str, optional): Direct text content to process
             
         Returns:
             np.ndarray: Text embeddings
         """
-        
+            
         # Clean and preprocess text
         cleaned_text = clean_text(text)
         
@@ -43,9 +52,10 @@ class TextDataLoader(BaseDataLoader):
             query (str): The query to generate an embedding for
         """
         embeddings = self.process_data(text=query)
+
         return embeddings
     
-    def save_text_memory(self, text_path: str, metadata: Dict[str, Any] = None):
+    def save_text_memory(self, text_path: str = None, text: str = None, metadata: Dict[str, Any] = None):
         """
         Process text, generate embeddings, and save to vector DB
         
@@ -53,15 +63,18 @@ class TextDataLoader(BaseDataLoader):
             text_path (str): Path to the text file
             metadata (Dict[str, Any]): Additional metadata to store
         """
+        
+        text = self.load_text(text_path=text_path, text=text)
+
         if metadata is None:
             metadata = {}
-        
         # Add text-specific metadata
         metadata['type'] = 'text'
         metadata['source'] = text_path
+        metadata['text'] = text
         
         # Process text and get embeddings
-        embeddings = self.process_data(text_path)
+        embeddings = self.process_data(text=text)    
         
         # Save to vector DB with structured format
-        self.save_memory(embeddings, metadata) 
+        self.save_memory(embedding=embeddings, metadata=metadata) 
