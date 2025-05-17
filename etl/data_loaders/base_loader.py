@@ -59,8 +59,7 @@ class BaseDataLoader(ABC):
             'document': text if text else image,
             'embedding': embedding 
         }
-        
-        print(record)
+
         # Save to vector DB
         self.vector_db.add_memory(record=record)
     

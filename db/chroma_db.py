@@ -148,7 +148,7 @@ class ChromaDB:
                     'text': metadata.get('text', results['documents'][0][i]),
                     'image': metadata.get('image', ''),
                     'embedding': results['embeddings'][0][i] if 'embeddings' in results else None,
-                    'metadata': json.loads(metadata.get('metadata', '{}')),
+                    'metadata': metadata,
                     'distance': results['distances'][0][i] if results['distances'] else None
                 })
             
@@ -176,7 +176,7 @@ class ChromaDB:
                     'doc_id': metadata.get('doc_id', result['ids'][0]),
                     'document': metadata.get('document', result['documents'][0]),
                     'embedding': result['embeddings'][0] if 'embeddings' in result else None,
-                    'metadata': json.loads(metadata.get('metadata', '{}'))
+                    'metadata': metadata
                 }
             return None
         except Exception as e:

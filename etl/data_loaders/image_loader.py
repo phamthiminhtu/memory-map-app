@@ -7,8 +7,9 @@ import clip
 from typing import Dict, Any
 
 class ImageDataLoader(BaseDataLoader):
-    def __init__(self, vector_db, model_name: str = "ViT-B/32"):
+    def __init__(self, vector_db, persist_directory: str = 'data/embeded_image', model_name: str = "ViT-B/32"):
         super().__init__(vector_db)
+        self.persist_directory = persist_directory
         self.model, self.processor = clip.load(model_name)
     
     def process_data(self, image_path: str) -> np.ndarray:

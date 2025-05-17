@@ -5,8 +5,9 @@ from typing import Dict, Any
 from utils.text_cleaning import clean_text, split_into_chunks
 
 class TextDataLoader(BaseDataLoader):
-    def __init__(self, vector_db, model_name: str = "all-MiniLM-L6-v2"):
+    def __init__(self, vector_db, persist_directory: str = 'data/embeded_text', model_name: str = "all-MiniLM-L6-v2"):
         super().__init__(vector_db)
+        self.persist_directory = persist_directory
         self.model = SentenceTransformer(model_name)
 
     def load_text(self, text_path: str = None, text: str = None) -> str:
