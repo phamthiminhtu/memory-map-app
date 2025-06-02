@@ -44,10 +44,8 @@ class BaseDataLoader(ABC):
         """
         # Generate doc_id based on content type
         if metadata['type'] == 'text':
-            with open(metadata['source'], 'r', encoding='utf-8') as f:
-                text_content = f.read()
-            doc_id = self._generate_doc_id(text=text_content)
-            text = text_content
+            text = metadata['text']
+            doc_id = self._generate_doc_id(text=text)
             image = None
         else:  # type == 'image'
             doc_id = self._generate_doc_id(file_path=metadata.get('source'))
@@ -56,10 +54,10 @@ class BaseDataLoader(ABC):
         
         # Create structured record
         record = {
+            'metadata': metadata,  # Store full metadata for reference
             'doc_id': doc_id,
             'document': text if text else image,
-            'embedding': embedding,
-            'metadata': metadata  # Store full metadata for reference
+            'embedding': embedding 
         }
 
         # Save to vector DB
@@ -68,3 +66,18 @@ class BaseDataLoader(ABC):
     def load_memories(self, query_embedding: np.ndarray, k: int = 5) -> List[Dict[str, Any]]:
         """Load k most similar memories"""
         return self.vector_db.search(query_embedding, k) 
+
+    def delete_memory(self, doc_id: str):
+        """Delete a memory by its document ID"""
+        self.vector_db.delete_memory(doc_id)
+
+        return f"Memory with doc_id {doc_id} deleted"
+    
+    def delete_all_memories(self):
+        """Delete all memories"""
+        deleted_memories = []
+        for memory in self.vector_db.get_all_memories():
+            self.vector_db.delete_memory(memory['doc_id'])
+            deleted_memories.append(memory['doc_id'])
+
+        return f"Total {len(deleted_memories)} memories deleted: {deleted_memories}"
