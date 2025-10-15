@@ -101,7 +101,10 @@ class ChromaDB:
             metadata = record.get('metadata', {})
             if not isinstance(metadata, dict):
                 metadata = {}
-            
+
+            # Remove None values from metadata as ChromaDB doesn't accept them
+            metadata = {k: v for k, v in metadata.items() if v is not None}
+
             # Add the record to the memories collection
             self.memories.add(
                 documents=[record.get('text', '')],
