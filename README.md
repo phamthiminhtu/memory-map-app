@@ -1,7 +1,9 @@
 # memory-map-app
 
+**Note**: This repository was developed with the assistance of Claude Code and Cursor.
+
 ## Goals
-Play around with unstructured data processing using vector databases (ChromaDB), multimodal embedding models and interactive web interfaces for intelligent memory retrieval.
+Play around with unstructured data processing using vector databases (ChromaDB), multimodal embedding models and interactive web interfaces for memory retrieval with natural language.
 
 ## Idea
 
