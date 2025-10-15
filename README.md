@@ -13,8 +13,11 @@ A personal memory mapping application that helps you organize and retrieve your 
 
 1. Add memories through the web interface
 2. Search for memories using natural language
-3. View memory connections and relationships
-4. Export and backup your memories
+
+## Features to implement
+1. Own your data! Host it in your own drive/ storage
+2. View memory connections and relationships
+3. Export and backup your memories
 
 ## Technology Stack
 
