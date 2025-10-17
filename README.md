@@ -9,12 +9,31 @@ Play around with unstructured data processing using vector databases (ChromaDB),
 
 A personal memory mapping application that helps you organize and retrieve your memories (diary entries or photos) using AI-powered semantic search.
 
-## Usage
+## Features
 
-1. Add memories through the web interface
-2. Search for memories using natural language
-3. View memory connections and relationships
-4. Export and backup your memories
+- Upload and process text and images
+- Generate semantic embeddings for memories
+- Search through memories using natural language
+- MCP Server Integration: Expose memory search to AI tools via Model Context Protocol
+- Agentic Flow: LLM tool selection for complex queries
+  - Date-aware memory synthesis
+  - Chronological timeline creation
+  - Automatic text/image search combination
+  - Narrative story generation from memories
+
+
+
+## Roadmap - future features
+
+- Own your data! Host it in your own drive/ storage. Connect Claude Desktop with Google Drive to host data (instead of using local file system). The flow becomes: user inputs memories (text/ photo) -> Claude Desktop chooses tool to use (upload_memory in this case) -> data is uploaded to user's Google Drive.
+- Neuroscience knowledge integration: search web for related / fun neuroscience facts related to the memories retrieved.
+- Agentic flow has many levels, currently this project is at level 2. Aim for more sophisticated workflow in the future.
+  - Level 1: Rule-based
+  - Level 2: LLM tool selection: ```User input → LLM analyzes → Selects best tool → Executes → Output```
+  - Level 3: Multi-step reasoning: ```User input → LLM plans → Calls tool A → Analyzes result → Calls tool B → Synthesizes → Output```
+  - Level 4: Autonomous Agents: ```User goal → Agent plans → Executes tools → Evaluates → Re-plans → Repeats until goal met```
+
+
 
 ## Technology Stack
 
@@ -34,30 +53,6 @@ A personal memory mapping application that helps you organize and retrieve your 
 - **Semantic Similarity**: Cosine similarity-based ranking for relevant results
 - **Persistent Storage**: ChromaDB collections with automatic embedding generation
 - **Modular Design**: Separate loaders for different data types (text, images)
-
-## Features
-
-- Upload and process text and images
-- Generate semantic embeddings for memories
-- Search through memories using natural language
-- MCP Server Integration: Expose memory search to AI tools via Model Context Protocol
-- Agentic Flow: LLM tool selection for complex queries
-  - Date-aware memory synthesis
-  - Chronological timeline creation
-  - Automatic text/image search combination
-  - Narrative story generation from memories
-
-## Roadmap - future features
-
-- Connect Claude Desktop with Google Drive to host data (instead of using local file system). The flow becomes: user inputs memories (text/ photo) -> Claude Desktop chooses tool to use (upload_memory in this case) -> data is uploaded to user's Google Drive.
-- Neuroscience knowledge integration: search web for related / fun neuroscience facts related to the memories retrieved.
-- Agentic flow has many levels, currently this project is at level 2. Aim for more sophisticated workflow in the future.
-  - Level 1: Rule-based
-  - Level 2: LLM tool selection: ```User input → LLM analyzes → Selects best tool → Executes → Output```
-  - Level 3: Multi-step reasoning: ```User input → LLM plans → Calls tool A → Analyzes result → Calls tool B → Synthesizes → Output```
-  - Level 4: Autonomous Agents: ```User goal → Agent plans → Executes tools → Evaluates → Re-plans → Repeats until goal met```
-
-
 
 ## Setup
 
