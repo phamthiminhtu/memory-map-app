@@ -43,89 +43,42 @@ A personal memory mapping application that helps you organize and retrieve your 
 - Upload and process text and images
 - Generate semantic embeddings for memories
 - Search through memories using natural language
-- **MCP Server Integration**: Expose memory search to AI tools via Model Context Protocol
-- **Agentic Flow**: Intelligent multi-tool selection for complex queries
+- MCP Server Integration: Expose memory search to AI tools via Model Context Protocol
+- Agentic Flow: LLM tool selection for complex queries
   - Date-aware memory synthesis
   - Chronological timeline creation
   - Automatic text/image search combination
   - Narrative story generation from memories
 
+## Roadmap - future features
+
+- Connect Claude Desktop with Google Drive to host data (instead of using local file system). The flow becomes: user inputs memories (text/ photo) -> Claude Desktop chooses tool to use (upload_memory in this case) -> data is uploaded to user's Google Drive.
+- Neuroscience knowledge integration: search web for related / fun neuroscience facts related to the memories retrieved.
+- Agentic flow has many levels, currently this project is at level 2. Aim for more sophisticated workflow in the future.
+  - Level 1: Rule-based
+  - Level 2: LLM tool selection: ```User input → LLM analyzes → Selects best tool → Executes → Output```
+  - Level 3: Multi-step reasoning: ```User input → LLM plans → Calls tool A → Analyzes result → Calls tool B → Synthesizes → Output```
+  - Level 4: Autonomous Agents: ```User goal → Agent plans → Executes tools → Evaluates → Re-plans → Repeats until goal met```
+
+
+
 ## Setup
 
-### Quick Setup with uv (Recommended)
+### Quick Setup Options
 
-We recommend using [uv](https://github.com/astral-sh/uv) for faster dependency management:
-
+- Option 1: Run the automated setup script
 ```bash
-# Option 1: Run the automated setup script
 ./scripts/setup.sh
+```
 
+- Option 2: Use the Makefile
+```bash
 # Option 2: Use the Makefile
 make install
 ```
 
-The script will:
-1. Create a virtual environment at `~/workspace/memory-map-env`
-2. Compile dependencies with locked versions
-3. Install all packages using uv (much faster than pip)
+Details at: [Getting started](https://github.com/phamthiminhtu/memory-map-app/blob/master/docs/setup/get_started.md)
 
-**Run the application:**
-```bash
-source ~/workspace/memory-map-env/bin/activate  # Activate the environment
-streamlit run app/main.py
-```
+### MCP Server Setup
 
-**Other useful commands:**
-```bash
-make run        # Run the Streamlit app
-make run-mcp    # Run the MCP server
-make clean      # Remove virtual environment
-make update     # Update all dependencies
-```
-
-**Note:** The virtual environment is stored at `~/workspace/memory-map-env` (or `%USERPROFILE%\workspace\memory-map-env` on Windows) to keep it separate from the project directory.
-
-### MCP Server Setup (Optional)
-
-The MCP (Model Context Protocol) server allows external AI tools like Claude Desktop to search and manage your memories.
-
-#### Prerequisites
-
-Install MCP dependencies:
-```bash
-pip install mcp
-```
-
-#### Configure Claude Desktop
-
-1. Locate your Claude Desktop config file:
-   - **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
-   - **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
-   - **Linux**: `~/.config/Claude/claude_desktop_config.json`
-
-2. Add the memory-map server configuration:
-```json
-{
-  "mcpServers": {
-    "memory-map": {
-      "command": "/Users/tototus/workspace/memory-map-env/bin/python",
-      "args": [
-        "/Users/tototus/workspace/memory-map-app/mcp_server/server.py"
-      ],
-      "env": {
-        "PYTHONPATH": "/Users/tototus/workspace/memory-map-app"
-      }
-    }
-  }
-}
-```
-
-**Important**: Update both paths to match your actual installation:
-- `command`: Path to Python in your virtual environment (`~/workspace/memory-map-env/bin/python`)
-- `args[0]`: Path to the MCP server script
-- `env.PYTHONPATH`: Path to your project root directory
-
-3. Restart Claude Desktop
-
-4. The memory-map tools should now be available in Claude Desktop
-
+Please refer to [MCP Server setup](https://github.com/phamthiminhtu/memory-map-app/blob/master/docs/setup/mcp_server.md) for more details.
