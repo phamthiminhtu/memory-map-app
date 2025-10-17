@@ -3,7 +3,7 @@
 A semi vibe coding project using Claude Code and Cursor.
 
 ## Goals
-Play around with unstructured data processing using vector databases (ChromaDB), multimodal embedding models and interactive web interfaces for memory retrieval with natural language.
+Play around with unstructured data processing using vector databases (ChromaDB), multimodal embedding models, interactive web interfaces for memory retrieval with natural language and MCP server for interacting with AI clients for complex interactions.
 
 ## Ideas
 
