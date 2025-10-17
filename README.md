@@ -1,6 +1,6 @@
 # memory-map-app
 
-**Note**: This repository was developed with the assistance of Claude Code and Cursor.
+A semi vibe coding project using Claude Code and Cursor.
 
 ## Goals
 Play around with unstructured data processing using vector databases (ChromaDB), multimodal embedding models and interactive web interfaces for memory retrieval with natural language.
