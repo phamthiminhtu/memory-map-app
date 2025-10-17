@@ -56,7 +56,7 @@ class MemoryRetriever:
         
         # Filter and combine results
         relevant_memories = text_memories + image_memories
-        print(relevant_memories)
+        # print(relevant_memories)
         # Sort by distance
         relevant_memories.sort(key=lambda x: x.get('distance', float('inf')))
 
