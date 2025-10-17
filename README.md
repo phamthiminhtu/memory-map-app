@@ -50,9 +50,11 @@ A personal memory mapping application that helps you organize and retrieve your 
   - Automatic text/image search combination
   - Narrative story generation from memories
 
+
+
 ## Roadmap - future features
 
-- Connect Claude Desktop with Google Drive to host data (instead of using local file system). The flow becomes: user inputs memories (text/ photo) -> Claude Desktop chooses tool to use (upload_memory in this case) -> data is uploaded to user's Google Drive.
+- Own your data! Host it in your own drive/ storage. Connect Claude Desktop with Google Drive to host data (instead of using local file system). The flow becomes: user inputs memories (text/ photo) -> Claude Desktop chooses tool to use (upload_memory in this case) -> data is uploaded to user's Google Drive.
 - Neuroscience knowledge integration: search web for related / fun neuroscience facts related to the memories retrieved.
 - Agentic flow has many levels, currently this project is at level 2. Aim for more sophisticated workflow in the future.
   - Level 1: Rule-based
@@ -61,6 +63,25 @@ A personal memory mapping application that helps you organize and retrieve your 
   - Level 4: Autonomous Agents: ```User goal → Agent plans → Executes tools → Evaluates → Re-plans → Repeats until goal met```
 
 
+
+## Technology Stack
+
+### Core Technologies
+- **Vector Database**: [ChromaDB](https://www.trychroma.com/) - Efficient storage and retrieval of high-dimensional embeddings
+- **MCP Python**: [MCP Python](https://github.com/modelcontextprotocol/python-sdk) - MCP Server to interact with MCP Clients (Claude Desktop for this project)
+- **Web Framework**: [Streamlit](https://streamlit.io/) - Interactive Python web interface
+- **Deep Learning Framework**: [PyTorch](https://pytorch.org/) - Neural network operations and model inference
+
+
+### Embedding Models
+- **Image Embeddings**: [OpenAI CLIP](https://github.com/openai/CLIP) (ViT-B/32) - Vision-language model for image understanding and cross-modal search
+- **Text Embeddings**: [Sentence Transformers](https://www.sbert.net/) (all-MiniLM-L6-v2) - Semantic text embeddings optimized for similarity search
+
+### Architecture Highlights
+- **Multimodal Search**: Unified retrieval system across text and images
+- **Semantic Similarity**: Cosine similarity-based ranking for relevant results
+- **Persistent Storage**: ChromaDB collections with automatic embedding generation
+- **Modular Design**: Separate loaders for different data types (text, images)
 
 ## Setup
 
