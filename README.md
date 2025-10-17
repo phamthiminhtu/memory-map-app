@@ -20,8 +20,10 @@ A personal memory mapping application that helps you organize and retrieve your 
 
 ### Core Technologies
 - **Vector Database**: [ChromaDB](https://www.trychroma.com/) - Efficient storage and retrieval of high-dimensional embeddings
+- **MCP Python**: [MCP Python](https://github.com/modelcontextprotocol/python-sdk) - MCP Server to interact with MCP Clients (Claude Desktop for this project)
 - **Web Framework**: [Streamlit](https://streamlit.io/) - Interactive Python web interface
 - **Deep Learning Framework**: [PyTorch](https://pytorch.org/) - Neural network operations and model inference
+
 
 ### Embedding Models
 - **Image Embeddings**: [OpenAI CLIP](https://github.com/openai/CLIP) (ViT-B/32) - Vision-language model for image understanding and cross-modal search
