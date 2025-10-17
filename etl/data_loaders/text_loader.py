@@ -59,23 +59,29 @@ class TextDataLoader(BaseDataLoader):
     def save_text_memory(self, text_path: str = None, text: str = None, metadata: Dict[str, Any] = None):
         """
         Process text, generate embeddings, and save to vector DB
-        
+
         Args:
             text_path (str): Path to the text file
             metadata (Dict[str, Any]): Additional metadata to store
         """
-        
+        from datetime import datetime
+
         text = self.load_text(text_path=text_path, text=text)
 
         if metadata is None:
             metadata = {}
+
+        # Add timestamp if not present
+        if 'timestamp' not in metadata and 'date' not in metadata:
+            metadata['timestamp'] = datetime.now().isoformat()
+
         # Add text-specific metadata
         metadata['type'] = 'text'
         metadata['source'] = text_path
         metadata['text'] = text
-        
+
         # Process text and get embeddings
-        embeddings = self.process_data(text=text)    
-        
+        embeddings = self.process_data(text=text)
+
         # Save to vector DB with structured format
         self.save_memory(embedding=embeddings, metadata=metadata) 

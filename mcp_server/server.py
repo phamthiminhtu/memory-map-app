@@ -7,7 +7,6 @@ It uses stdio transport for local communication with AI tools like Claude Deskto
 
 import asyncio
 import sys
-import os
 from pathlib import Path
 
 # Add parent directory to path to import project modules
@@ -20,6 +19,9 @@ from mcp.types import Tool, TextContent, ImageContent, EmbeddedResource
 import mcp.types as types
 
 from services.memory_service import MemoryService
+from mcp_server.formatters import MCPFormatter
+from mcp_server.handlers import ToolRegistry
+from mcp_server.config import initialize_mcp_environment
 
 
 # Initialize server
@@ -27,6 +29,7 @@ server = Server("memory-map")
 
 # Global components (initialized in main)
 memory_service: MemoryService = None
+tool_registry: ToolRegistry = None
 
 
 @server.list_tools()
@@ -37,7 +40,8 @@ async def handle_list_tools() -> list[Tool]:
             name="search_memories",
             description="Search through both text and image memories using natural language. "
                        "Returns relevant memories ranked by semantic similarity. "
-                       "Use this to find memories related to a specific topic, event, or concept.",
+                       "Use this to find memories related to a specific topic, event, or concept. "
+                       "NOTE: For more control, use search_text_memories or search_image_memories separately.",
             inputSchema={
                 "type": "object",
                 "properties": {
@@ -49,6 +53,115 @@ async def handle_list_tools() -> list[Tool]:
                         "type": "integer",
                         "description": "Number of results to return (default: 5, max: 20)",
                         "default": 5,
+                        "minimum": 1,
+                        "maximum": 20
+                    }
+                },
+                "required": ["query"]
+            }
+        ),
+        Tool(
+            name="search_text_memories",
+            description="Search ONLY text memories (diary entries, notes, written reflections). "
+                       "Use this when you specifically need text-based memories. "
+                       "Returns memories ranked by semantic similarity to the query.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "query": {
+                        "type": "string",
+                        "description": "Natural language search query for text memories"
+                    },
+                    "n_results": {
+                        "type": "integer",
+                        "description": "Number of results to return (default: 5, max: 20)",
+                        "default": 5,
+                        "minimum": 1,
+                        "maximum": 20
+                    }
+                },
+                "required": ["query"]
+            }
+        ),
+        Tool(
+            name="search_image_memories",
+            description="Search ONLY image memories (photos, screenshots, visual content). "
+                       "Use this when you specifically need image-based memories. "
+                       "Returns memories ranked by visual and semantic similarity.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "query": {
+                        "type": "string",
+                        "description": "Natural language search query for image memories"
+                    },
+                    "n_results": {
+                        "type": "integer",
+                        "description": "Number of results to return (default: 5, max: 20)",
+                        "default": 5,
+                        "minimum": 1,
+                        "maximum": 20
+                    }
+                },
+                "required": ["query"]
+            }
+        ),
+        Tool(
+            name="search_memories_by_date",
+            description="Search memories within a specific date range. "
+                       "Searches both text and images, filtering by date. "
+                       "Useful for questions like 'what was I doing on October 15?' or 'show me memories from last week'.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "query": {
+                        "type": "string",
+                        "description": "Natural language search query"
+                    },
+                    "start_date": {
+                        "type": "string",
+                        "description": "Start date in YYYY-MM-DD format or natural language (e.g., 'October 15', 'last Monday')"
+                    },
+                    "end_date": {
+                        "type": "string",
+                        "description": "End date in YYYY-MM-DD format or natural language (optional, defaults to start_date)"
+                    },
+                    "n_results": {
+                        "type": "integer",
+                        "description": "Number of results to return (default: 10)",
+                        "default": 10,
+                        "minimum": 1,
+                        "maximum": 50
+                    }
+                },
+                "required": ["query", "start_date"]
+            }
+        ),
+        Tool(
+            name="synthesize_memory_story",
+            description="AGENTIC TOOL: Synthesize memories from multiple sources into a coherent timeline story. "
+                       "Searches both text and images, filters by date if specified, and creates a chronological narrative. "
+                       "This is the MAIN tool for answering questions like 'what was I doing on [date]?' "
+                       "It returns structured data ready for you to craft into a natural narrative.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "query": {
+                        "type": "string",
+                        "description": "Natural language query about memories (e.g., 'my activities on October 15')"
+                    },
+                    "start_date": {
+                        "type": "string",
+                        "description": "Optional start date filter (YYYY-MM-DD or natural language)"
+                    },
+                    "end_date": {
+                        "type": "string",
+                        "description": "Optional end date filter (YYYY-MM-DD or natural language)"
+                    },
+                    "n_results_per_type": {
+                        "type": "integer",
+                        "description": "Number of results to fetch per memory type (default: 10)",
+                        "default": 10,
                         "minimum": 1,
                         "maximum": 20
                     }
@@ -121,164 +234,28 @@ async def handle_list_tools() -> list[Tool]:
 async def handle_call_tool(
     name: str, arguments: dict | None
 ) -> list[TextContent | ImageContent | EmbeddedResource]:
-    """Handle tool execution requests."""
-
+    """Handle tool execution requests using the tool registry."""
     if not arguments:
         arguments = {}
 
-    try:
-        if name == "search_memories":
-            query = arguments.get("query", "")
-            n_results = arguments.get("n_results", 5)
-
-            if not query:
-                return [TextContent(
-                    type="text",
-                    text="Error: Query parameter is required"
-                )]
-
-            # Search using service
-            result = memory_service.search_memories(query, n_results)
-
-            if result.count == 0:
-                return [TextContent(
-                    type="text",
-                    text=f"No memories found for query: '{query}'"
-                )]
-
-            # Format results
-            response_text = f"Found {result.count} memories for '{query}':\n\n"
-
-            for idx, memory in enumerate(result.memories, 1):
-                metadata = memory.get('metadata', {})
-                memory_type = metadata.get('type', 'unknown')
-                distance = memory.get('distance', 'N/A')
-
-                response_text += f"--- Memory {idx} ({memory_type}) ---\n"
-                response_text += f"Relevance Score: {distance:.4f}\n"
-
-                if metadata.get('title'):
-                    response_text += f"Title: {metadata['title']}\n"
-
-                if metadata.get('tags'):
-                    response_text += f"Tags: {metadata['tags']}\n"
-
-                if metadata.get('description'):
-                    response_text += f"Description: {metadata['description']}\n"
-
-                if memory_type == 'text':
-                    text_content = metadata.get('text', memory.get('document', ''))
-                    # Truncate long text
-                    if len(text_content) > 500:
-                        text_content = text_content[:500] + "..."
-                    response_text += f"Content: {text_content}\n"
-                elif memory_type == 'image':
-                    response_text += f"Image Path: {metadata.get('source', 'N/A')}\n"
-
-                response_text += "\n"
-
-            return [TextContent(type="text", text=response_text)]
-
-        elif name == "add_text_memory":
-            text = arguments.get("text", "")
-            title = arguments.get("title", "")
-            tags = arguments.get("tags", "")
-            description = arguments.get("description", "")
-
-            if not text:
-                return [TextContent(
-                    type="text",
-                    text="Error: Text parameter is required"
-                )]
-
-            # Add memory using service
-            doc_id = memory_service.add_text_memory(
-                text=text,
-                title=title or None,
-                tags=tags or None,
-                description=description or None
-            )
-
-            return [TextContent(
-                type="text",
-                text=f"Successfully added text memory with ID: {doc_id}\n"
-                     f"Title: {title if title else 'N/A'}\n"
-                     f"Tags: {tags if tags else 'N/A'}"
-            )]
-
-        elif name == "get_memory_stats":
-            # Get stats using service
-            stats = memory_service.get_memory_stats()
-
-            response_text = f"Memory Statistics:\n\n"
-            response_text += f"Total Memories: {stats.total_count}\n"
-            response_text += f"├── Text Memories: {stats.text_count}\n"
-            response_text += f"└── Image Memories: {stats.image_count}\n"
-
-            return [TextContent(type="text", text=response_text)]
-
-        elif name == "list_recent_memories":
-            limit = arguments.get("limit", 10)
-            memory_type = arguments.get("memory_type", "all")
-
-            # Get memories using service
-            memories = memory_service.list_recent_memories(limit, memory_type)
-
-            if not memories:
-                return [TextContent(
-                    type="text",
-                    text=f"No {memory_type} memories found."
-                )]
-
-            response_text = f"Recent {memory_type} memories (showing {len(memories)}):\n\n"
-
-            for idx, memory in enumerate(memories, 1):
-                metadata = memory.get('metadata', {})
-                mem_type = metadata.get('type', 'unknown')
-
-                response_text += f"--- Memory {idx} ({mem_type}) ---\n"
-
-                if metadata.get('title'):
-                    response_text += f"Title: {metadata['title']}\n"
-
-                if metadata.get('tags'):
-                    response_text += f"Tags: {metadata['tags']}\n"
-
-                if metadata.get('description'):
-                    response_text += f"Description: {metadata['description']}\n"
-
-                if mem_type == 'text':
-                    text_content = metadata.get('text', memory.get('document', ''))
-                    if len(text_content) > 300:
-                        text_content = text_content[:300] + "..."
-                    response_text += f"Content: {text_content}\n"
-                elif mem_type == 'image':
-                    response_text += f"Image Path: {metadata.get('source', 'N/A')}\n"
-
-                response_text += "\n"
-
-            return [TextContent(type="text", text=response_text)]
-
-        else:
-            return [TextContent(
-                type="text",
-                text=f"Error: Unknown tool '{name}'"
-            )]
-
-    except Exception as e:
-        return [TextContent(
-            type="text",
-            text=f"Error executing tool '{name}': {str(e)}"
-        )]
+    return tool_registry.handle(name, arguments)
 
 
 async def main():
     """Main entry point for the MCP server."""
-    global memory_service
+    global memory_service, tool_registry
 
-    # Initialize memory service
+    # Initialize MCP environment and memory service
     try:
-        memory_service = MemoryService()
+        # Initialize environment (creates directories, sets up config)
+        config = initialize_mcp_environment()
+
+        # Initialize memory service with configured paths
+        memory_service = MemoryService(**config.get_memory_service_config())
+
+        # Initialize formatter and tool registry
+        formatter = MCPFormatter()
+        tool_registry = ToolRegistry(memory_service, formatter)
     except Exception as e:
         print(f"Error initializing memory service: {e}", file=sys.stderr)
         sys.exit(1)

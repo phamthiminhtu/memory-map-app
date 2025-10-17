@@ -137,22 +137,37 @@ class ImageDataLoader(BaseDataLoader):
         Process image and metadata, generate embeddings, and save to vector DB
         """
         try:
+            from datetime import datetime
+            import os
+
             logger.info(f"Saving image memory: {image_path}")
-            
+
             if metadata is None:
                 metadata = {}
-            
+
+            # Add timestamp if not present - try file modification time first
+            if 'timestamp' not in metadata and 'date' not in metadata:
+                try:
+                    # Use file modification time if available
+                    if os.path.exists(image_path):
+                        mtime = os.path.getmtime(image_path)
+                        metadata['timestamp'] = datetime.fromtimestamp(mtime).isoformat()
+                    else:
+                        metadata['timestamp'] = datetime.now().isoformat()
+                except:
+                    metadata['timestamp'] = datetime.now().isoformat()
+
             # Add image-specific metadata
             metadata['type'] = 'image'
             metadata['source'] = image_path
-            
+
             # Process image and metadata to get combined embedding
             embedding = self.process_data(image_path, metadata)
-            
+
             # Save to vector DB with structured format
             self.save_memory(embedding, metadata)
             logger.info("Successfully saved image memory")
-            
+
         except Exception as e:
             logger.error(f"Error saving image memory: {str(e)}")
             raise 

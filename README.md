@@ -39,6 +39,11 @@ A personal memory mapping application that helps you organize and retrieve your 
 - Generate semantic embeddings for memories
 - Search through memories using natural language
 - **MCP Server Integration**: Expose memory search to AI tools via Model Context Protocol
+- **Agentic Flow**: Intelligent multi-tool selection for complex queries
+  - Date-aware memory synthesis
+  - Chronological timeline creation
+  - Automatic text/image search combination
+  - Narrative story generation from memories
 
 ## Setup
 
@@ -141,10 +146,34 @@ pip install mcp
 
 #### Available MCP Tools
 
-Once configured, Claude Desktop can use these tools:
+Once configured, Claude Desktop can use these tools with **agentic behavior** - Claude will intelligently select and combine tools based on your query:
 
-- **`search_memories`** - Search through text and image memories using natural language
+**🤖 Primary Agentic Tools:**
+
+- **`synthesize_memory_story`** ⭐ - The main agentic tool for narrative queries
+  - Searches both text and images
+  - Filters by date automatically
+  - Creates chronological timelines
+  - Perfect for: "What was I doing on October 15?", "Tell me about my week"
+  - Parameters: `query` (required), `start_date`, `end_date`, `n_results_per_type`
+
+- **`search_memories_by_date`** - Date-aware search across all memory types
+  - Searches both text and images with temporal filtering
+  - Useful for: "Find memories from last week", "Show me October 15"
+  - Parameters: `query`, `start_date` (required), `end_date`, `n_results`
+
+**🔍 Specialized Search Tools:**
+
+- **`search_text_memories`** - Search ONLY text memories (diary entries, notes)
   - Parameters: `query` (string), `n_results` (integer, default: 5)
+
+- **`search_image_memories`** - Search ONLY image memories (photos, screenshots)
+  - Parameters: `query` (string), `n_results` (integer, default: 5)
+
+- **`search_memories`** - Unified search (legacy, less agentic)
+  - Parameters: `query` (string), `n_results` (integer, default: 5)
+
+**📝 Memory Management Tools:**
 
 - **`add_text_memory`** - Add new text-based memories
   - Parameters: `text` (required), `title`, `tags`, `description` (optional)
@@ -167,8 +196,25 @@ The server will start and wait for MCP protocol messages via stdin/stdout.
 
 #### Example Usage in Claude Desktop
 
-Once configured, you can ask Claude:
-- "Search my memories for trips to Japan"
-- "Add a text memory about my meeting today with tags work, planning"
-- "Show me my recent image memories"
-- "How many memories do I have stored?"
+Once configured, you can ask Claude natural questions and it will intelligently select the right tools:
+
+**📅 Date-Based Queries (Agentic):**
+- "What was I doing on October 15?" → Claude uses `synthesize_memory_story`
+- "Tell me about my week" → Claude uses date range synthesis
+- "Show me everything from last Monday" → Claude uses `search_memories_by_date`
+
+**🎯 Specialized Searches:**
+- "Find my work notes from September" → Claude uses `search_text_memories` with date filter
+- "Show me photos from the park" → Claude uses `search_image_memories`
+- "What did I write about AI?" → Claude uses `search_text_memories`
+
+**📝 Memory Management:**
+- "Add a note about today's meeting with tags work, planning"
+- "How many memories do I have?" → Claude uses `get_memory_stats`
+- "Show me my recent memories" → Claude uses `list_recent_memories`
+
+**💡 Complex Narratives:**
+- "Create a story of my October" → Claude uses synthesis with broad date range
+- "What were the highlights of my week?" → Combines search and synthesis
+
+See [examples/claude_desktop_usage.md](examples/claude_desktop_usage.md) for detailed examples.
