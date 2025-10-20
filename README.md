@@ -12,7 +12,7 @@ A personal memory mapping application that helps you:
 - Use AI clients (Claude Desktop) to retrieve and connect related memories based on your queries.
 - Provide neuroscience insights based on your memories.
 
-## Features
+## Implemented features
 
 - Upload and process text and images
 - Generate semantic embeddings for memories
@@ -34,8 +34,7 @@ A personal memory mapping application that helps you:
   - Level 2: LLM tool selection: ```User input → LLM analyzes → Selects best tool → Executes → Output```
   - Level 3: Multi-step reasoning: ```User input → LLM plans → Calls tool A → Analyzes result → Calls tool B → Synthesizes → Output```
   - Level 4: Autonomous Agents: ```User goal → Agent plans → Executes tools → Evaluates → Re-plans → Repeats until goal met```
-
-
+- Hosting solutions: deploy the app + MCP server + replace ChromaDB with cloud database.
 
 ## Technology Stack
 
