@@ -1,8 +1,8 @@
-from core.processors.base_loader import BaseDataLoader
+from backend.core.processors.base_loader import BaseDataLoader
 from sentence_transformers import SentenceTransformer
 import numpy as np
 from typing import Dict, Any
-from utils.text_cleaning import clean_text, split_into_chunks
+from backend.utils.text_cleaning import clean_text, split_into_chunks
 
 class TextDataLoader(BaseDataLoader):
     def __init__(self, vector_db, persist_directory: str = 'data/embeded_text', model_name: str = "all-MiniLM-L6-v2"):

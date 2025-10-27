@@ -1,8 +1,8 @@
-from core.processors.text_loader import TextDataLoader
-from core.processors.image_loader import ImageDataLoader
+from backend.core.processors.text_loader import TextDataLoader
+from backend.core.processors.image_loader import ImageDataLoader
 from typing import Dict, Any, List, Tuple
 import numpy as np
-from db.chroma_db import ChromaDB
+from backend.db.chroma_db import ChromaDB
 
 class MemoryRetriever:
     def __init__(

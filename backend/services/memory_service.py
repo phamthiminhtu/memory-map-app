@@ -10,10 +10,10 @@ from dataclasses import dataclass
 from datetime import datetime
 from dateutil import parser as date_parser
 import re
-from db.chroma_db import ChromaDB
-from core.processors.text_loader import TextDataLoader
-from core.processors.image_loader import ImageDataLoader
-from core.retrievers.memory_retriever import MemoryRetriever
+from backend.db.chroma_db import ChromaDB
+from backend.core.processors.text_loader import TextDataLoader
+from backend.core.processors.image_loader import ImageDataLoader
+from backend.core.retrievers.memory_retriever import MemoryRetriever
 
 
 @dataclass

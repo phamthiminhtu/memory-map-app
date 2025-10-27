@@ -6,7 +6,7 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).parent.parent))
 
 from app.components import render_header
-from services.memory_service import MemoryService
+from backend.services.memory_service import MemoryService
 import os
 
 # Initialize session state for memory service

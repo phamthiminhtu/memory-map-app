@@ -6,8 +6,8 @@ This module contains the command pattern implementation for handling tool calls.
 
 from typing import Dict, Any, List
 from mcp.types import TextContent
-from services.memory_service import MemoryService
-from mcp_server.formatters import MCPFormatter
+from backend.services.memory_service import MemoryService
+from backend.mcp_server.formatters import MCPFormatter
 
 
 class ToolHandler:
