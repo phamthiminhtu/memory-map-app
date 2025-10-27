@@ -6,7 +6,7 @@ into human-readable text responses for the MCP protocol.
 """
 
 from typing import Dict, Any, List
-from services.memory_service import SearchResult, SynthesisResult
+from backend.services.memory_service import SearchResult, SynthesisResult
 
 
 class MCPFormatter:

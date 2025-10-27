@@ -18,10 +18,10 @@ from mcp.server import NotificationOptions, Server
 from mcp.types import Tool, TextContent, ImageContent, EmbeddedResource
 import mcp.types as types
 
-from services.memory_service import MemoryService
-from mcp_server.formatters import MCPFormatter
-from mcp_server.handlers import ToolRegistry
-from mcp_server.config import initialize_mcp_environment
+from backend.services.memory_service import MemoryService
+from backend.mcp_server.formatters import MCPFormatter
+from backend.mcp_server.handlers import ToolRegistry
+from backend.mcp_server.config import initialize_mcp_environment
 
 
 # Initialize server

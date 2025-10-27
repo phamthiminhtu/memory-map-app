@@ -5,8 +5,8 @@ from pathlib import Path
 # Add parent directory to path for imports
 sys.path.append(str(Path(__file__).parent.parent))
 
-from components import render_header
-from services.memory_service import MemoryService
+from app.components import render_header
+from backend.services.memory_service import MemoryService
 import os
 
 # Initialize session state for memory service

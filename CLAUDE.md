@@ -1,0 +1,2 @@
+1. Always use ~/memory-map-env/bin/activate venv, do not run in global environment.
+2. When creating doc (markdown files) always create in docs folder. Create sub folder in docs folder when applicable.
