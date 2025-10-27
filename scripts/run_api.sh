@@ -6,14 +6,17 @@
 # Activate virtual environment
 source ~/workspace/memory-map-env/bin/activate
 
-# Navigate to project root
-cd "$(dirname "$0")"
+# Navigate to project root (parent of scripts directory)
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+cd "$PROJECT_ROOT"
 
 # Set PYTHONPATH to include the project root
-export PYTHONPATH="${PYTHONPATH}:$(pwd)"
+export PYTHONPATH="${PYTHONPATH}:${PROJECT_ROOT}"
 
 # Run the FastAPI server
 echo "Starting Memory Map FastAPI backend..."
+echo "Project root: $PROJECT_ROOT"
 echo "API documentation will be available at: http://localhost:8000/docs"
 echo "Health check: http://localhost:8000/health"
 echo ""
