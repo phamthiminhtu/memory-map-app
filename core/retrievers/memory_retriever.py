@@ -1,5 +1,5 @@
-from etl.data_loaders.text_loader import TextDataLoader
-from etl.data_loaders.image_loader import ImageDataLoader
+from core.processors.text_loader import TextDataLoader
+from core.processors.image_loader import ImageDataLoader
 from typing import Dict, Any, List, Tuple
 import numpy as np
 from db.chroma_db import ChromaDB

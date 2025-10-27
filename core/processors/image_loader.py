@@ -1,4 +1,4 @@
-from etl.data_loaders.base_loader import BaseDataLoader
+from core.processors.base_loader import BaseDataLoader
 from PIL import Image
 import torch
 import numpy as np

@@ -1,4 +1,4 @@
-from etl.data_loaders.base_loader import BaseDataLoader
+from core.processors.base_loader import BaseDataLoader
 from sentence_transformers import SentenceTransformer
 import numpy as np
 from typing import Dict, Any
