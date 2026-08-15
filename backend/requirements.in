@@ -1,0 +1,11 @@
+streamlit
+sentence-transformers
+chromadb
+Pillow
+torch
+transformers
+openai-clip
+torchvision
+mcp
+fastapi
+python-multipart

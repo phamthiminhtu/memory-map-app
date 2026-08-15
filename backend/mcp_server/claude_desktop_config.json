@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "memory-map": {
+      "command": "/Users/tototus/workspace/memory-map-env/bin/python",
+      "args": [
+        "/Users/tototus/workspace/memory-map-app/mcp_server/server.py"
+      ],
+      "env": {
+        "PYTHONPATH": "/Users/tototus/workspace/memory-map-app"
+      }
+    }
+  }
+}

@@ -1,8 +1,18 @@
-# Memory Map
+# memory-map-app
 
-A personal memory mapping application that helps you organize and retrieve your memories using AI-powered semantic search.
+A semi vibe coding project using Claude Code and Cursor.
 
-## Features
+## Goals
+Play around with unstructured data processing using vector databases (ChromaDB), multimodal embedding models, interactive web interfaces for memory retrieval with natural language and an MCP server to handle complex interactions with AI clients.
+
+## Ideas
+
+A personal memory mapping application that helps you:
+- Track your memories (diary entries or photos) in a vector database.
+- Use AI clients (Claude Desktop) to retrieve and connect related memories based on your queries.
+- Provide neuroscience insights based on your memories.
+
+## Implemented features
 
 - Upload and process text and images
 - Generate semantic embeddings for memories
