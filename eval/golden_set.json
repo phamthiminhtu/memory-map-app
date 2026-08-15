@@ -1,0 +1,56 @@
+[
+  {
+    "id": "temporal_01",
+    "intent": "temporal",
+    "question": "What did I do on July 14, 2026?",
+    "must_include": ["hiking", "ridge trail", "2026-07-14"]
+  },
+  {
+    "id": "temporal_02",
+    "intent": "temporal",
+    "question": "What was going on in the first week of August 2026?",
+    "must_include": ["swim", "CLIP", "museum", "beach"]
+  },
+  {
+    "id": "temporal_03",
+    "intent": "temporal",
+    "question": "What happened between July 25 and July 30, 2026?",
+    "must_include": ["team offsite", "gym", "interviews"]
+  },
+  {
+    "id": "narrative_01",
+    "intent": "narrative",
+    "question": "Tell me the story of my day on August 14, 2026.",
+    "must_include": ["Q3 roadmap", "river", "sunset", "FastAPI"]
+  },
+  {
+    "id": "narrative_02",
+    "intent": "narrative",
+    "question": "Give me a narrative of my week around July 11 to July 14, 2026, covering both hobbies and project work.",
+    "must_include": ["bakery", "croissant", "hiking", "ridge trail"]
+  },
+  {
+    "id": "narrative_03",
+    "intent": "narrative",
+    "question": "Summarize how the memory-map-app project has progressed across my diary entries.",
+    "must_include": ["memory-map-app", "FastAPI", "CLIP"]
+  },
+  {
+    "id": "multisource_01",
+    "intent": "multi-source",
+    "question": "What memories do I have about bakeries or croissants, including any photos?",
+    "must_include": ["croissant", "bakery", "2026-07-11"]
+  },
+  {
+    "id": "multisource_02",
+    "intent": "multi-source",
+    "question": "Find any text entries and photos related to being outdoors on a trail.",
+    "must_include": ["hiking", "ridge trail", "cycling", "river trail"]
+  },
+  {
+    "id": "multisource_03",
+    "intent": "multi-source",
+    "question": "What do I have, in text or images, about museums or photography exhibits?",
+    "must_include": ["museum", "photography exhibit", "2026-08-05"]
+  }
+]

@@ -48,7 +48,6 @@ class ChromaDB:
         try:
             # Get or create memories collection
             self.memories = self.client.get_or_create_collection(
-                name="memories"
                 # metadata={
                 #     "hnsw:space": "cosine",
                 #     "description": "Collection for storing memories with text, image, and metadata",
@@ -60,6 +59,19 @@ class ChromaDB:
                 #         "metadata": "json"
                 #     }
                 # }
+                name="memories",
+                embedding_function=self.embedding_function,
+                metadata={
+                    "hnsw:space": "cosine",
+                    "description": "Collection for storing memories with text, image, and metadata",
+                }
+            )
+            
+            # Get or create user_memories collection
+            self.user_memories = self.client.get_or_create_collection(
+                name="user_memories",
+                embedding_function=self.embedding_function,
+                metadata={"hnsw:space": "cosine"}
             )
             
             logger.info("Collections initialized successfully")
@@ -69,50 +81,51 @@ class ChromaDB:
     
     def add_memory(self, record: Dict[str, Any]) -> str:
         """
-        Add a new memory to the database
-        
+        Add a memory to the database
+
         Args:
-            doc_id (str): Unique identifier for the memory
-            text (str): The text content of the memory
-            image (Optional[str]): URL or path to the image
-            embedding (Optional[List[float]]): Pre-computed embedding vector
-            metadata (Optional[Dict[str, Any]]): Additional metadata for the memory
-            
+            record (Dict[str, Any]): { 'doc_id', 'text', 'image', 'embedding', 'metadata' }
+                as produced by BaseDataLoader.save_memory().
+
         Returns:
             str: ID of the added memory
         """
         try:
-            # Validate required fields
-            if record.get('embedding') is None:
-                raise ValueError("Embedding is required")
-            
-            # Ensure embedding is a list of floats
-            embedding = record.get('embedding')
-            if isinstance(embedding, np.ndarray):
-                embedding = embedding.tolist()
-            elif not isinstance(embedding, list):
-                raise ValueError("Embedding must be a list of floats or a numpy array")
-            
-            doc_id = record.get('doc_id')
-            if not doc_id:
-                raise ValueError("doc_id is required")
-            
-            # Prepare metadata - flatten nested dictionaries and convert all values to strings
-            metadata = record.get('metadata', {})
-            if not isinstance(metadata, dict):
-                metadata = {}
+            doc_id = record["doc_id"]
+            text = record.get("text")
+            image = record.get("image")
+            embedding = record.get("embedding")
+            metadata = record.get("metadata") or {}
 
-            # Remove None values from metadata as ChromaDB doesn't accept them
-            metadata = {k: v for k, v in metadata.items() if v is not None}
+            # Chroma always needs a document string. Text memories have one;
+            # for image-only memories fall back to something human-readable.
+            document_text = text or metadata.get("title") or metadata.get("filename") or doc_id
+
+            # If no embedding provided, generate one from the text
+            if embedding is None:
+                embedding = self.embedding_function([document_text])[0]
+            else:
+                # Loaders may hand back a numpy array with a leading batch dim
+                # (e.g. shape (1, hidden_dim)) -- Chroma expects one flat
+                # vector per item.
+                embedding = np.asarray(embedding).reshape(-1).tolist()
+
+            # Prepare metadata
+            full_metadata = {
+                "doc_id": doc_id,
+                "text": text or "",
+                "image": image or "",
+                "metadata": json.dumps(metadata) if isinstance(metadata, dict) else "{}"
+            }
 
             # Add the record to the memories collection
             self.memories.add(
-                documents=[record.get('text', '')],
+                documents=[document_text],
                 embeddings=[embedding],
                 ids=[doc_id],
                 metadatas=[metadata]
             )
-            
+
             logger.info(f"Inserted record with ID: {doc_id}")
             return doc_id
         except Exception as e:
@@ -150,8 +163,8 @@ class ChromaDB:
                     'doc_id': metadata.get('doc_id', results['ids'][0][i]),
                     'text': metadata.get('text', results['documents'][0][i]),
                     'image': metadata.get('image', ''),
-                    'embedding': results['embeddings'][0][i] if 'embeddings' in results else None,
-                    'metadata': metadata,
+                    'embedding': results['embeddings'][0][i] if results.get('embeddings') is not None else None,
+                    'metadata': json.loads(metadata.get('metadata', '{}')),
                     'distance': results['distances'][0][i] if results['distances'] else None
                 })
             
@@ -177,9 +190,10 @@ class ChromaDB:
                 metadata = result['metadatas'][0]
                 return {
                     'doc_id': metadata.get('doc_id', result['ids'][0]),
-                    'document': metadata.get('document', result['documents'][0]),
-                    'embedding': result['embeddings'][0] if 'embeddings' in result else None,
-                    'metadata': metadata
+                    'text': metadata.get('text', result['documents'][0]),
+                    'image': metadata.get('image', ''),
+                    'embedding': result['embeddings'][0] if result.get('embeddings') is not None else None,
+                    'metadata': json.loads(metadata.get('metadata', '{}'))
                 }
             return None
         except Exception as e:
@@ -221,9 +235,10 @@ class ChromaDB:
                 metadata = results['metadatas'][i]
                 formatted_results.append({
                     'doc_id': metadata.get('doc_id', results['ids'][i]),
-                    'document': metadata.get('document', results['documents'][i]),
-                    'embedding': results['embeddings'][i] if 'embeddings' in results else None,
-                    'metadata': metadata  # Return the metadata directly
+                    'text': metadata.get('text', results['documents'][i]),
+                    'image': metadata.get('image', ''),
+                    'embedding': results['embeddings'][i] if results.get('embeddings') is not None else None,
+                    'metadata': json.loads(metadata.get('metadata', '{}'))
                 })
             
             logger.info(f"Retrieved {len(formatted_results)} memories")
