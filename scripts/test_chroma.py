@@ -1,4 +1,4 @@
-from db.chroma_db import ChromaDB
+from backend.db.chroma_db import ChromaDB
 import numpy as np
 import uuid
 
