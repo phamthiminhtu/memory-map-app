@@ -1,4 +1,5 @@
 from backend.core.processors.base_loader import BaseDataLoader
+from pathlib import Path
 from PIL import Image
 import torch
 import numpy as np
@@ -131,6 +132,23 @@ class ImageDataLoader(BaseDataLoader):
             logger.error(f"Error generating query embedding: {str(e)}")
             raise
     
+    @staticmethod
+    def _parse_filename_metadata(image_path: str) -> Dict[str, Any]:
+        """
+        Extract date and description from filenames like 2026-07-14_hiking_ridge_trail.png.
+        Returns empty dict if the filename doesn't match the pattern.
+        """
+        import re
+        stem = Path(image_path).stem  # e.g. "2026-07-14_hiking_ridge_trail"
+        match = re.match(r'^(\d{4}-\d{2}-\d{2})(?:_(.+))?$', stem)
+        if not match:
+            return {}
+        date_str, description_slug = match.group(1), match.group(2)
+        result = {'date': date_str}
+        if description_slug:
+            result['description'] = description_slug.replace('_', ' ')
+        return result
+
     def save_image_memory(self, image_path: str, metadata: Dict[str, Any] = None):
         """
         Process image and metadata, generate embeddings, and save to vector DB
@@ -144,10 +162,14 @@ class ImageDataLoader(BaseDataLoader):
             if metadata is None:
                 metadata = {}
 
-            # Add timestamp if not present - try file modification time first
+            # Parse date and description from filename (e.g. 2026-07-14_hiking_ridge_trail.png)
+            filename_meta = self._parse_filename_metadata(image_path)
+            for key, value in filename_meta.items():
+                metadata.setdefault(key, value)
+
+            # Fall back to file modification time if no date found in filename
             if 'timestamp' not in metadata and 'date' not in metadata:
                 try:
-                    # Use file modification time if available
                     if os.path.exists(image_path):
                         mtime = os.path.getmtime(image_path)
                         metadata['timestamp'] = datetime.fromtimestamp(mtime).isoformat()
@@ -155,6 +177,11 @@ class ImageDataLoader(BaseDataLoader):
                         metadata['timestamp'] = datetime.now().isoformat()
                 except:
                     metadata['timestamp'] = datetime.now().isoformat()
+
+            metadata.setdefault('filename', Path(image_path).name)
+            # Store description as text so it surfaces in retrieval results
+            if 'description' in metadata:
+                metadata.setdefault('text', metadata['description'])
 
             # Add image-specific metadata
             metadata['type'] = 'image'

@@ -1,8 +1,10 @@
 from backend.core.processors.text_loader import TextDataLoader
 from backend.core.processors.image_loader import ImageDataLoader
-from typing import Dict, Any, List, Tuple
+from backend.utils.text_cleaning import extract_date_range, rerank_by_date
+from typing import Dict, Any, List
 import numpy as np
 from backend.db.chroma_db import ChromaDB
+
 
 class MemoryRetriever:
     def __init__(
@@ -54,10 +56,10 @@ class MemoryRetriever:
             n_results=max(n_results*2, 5)
         )
         
-        # Filter and combine results
+        # Combine, re-rank by date if query contains date references, then sort
         relevant_memories = text_memories + image_memories
-        # print(relevant_memories)
-        # Sort by distance
+        date_range = extract_date_range(query)
+        relevant_memories = rerank_by_date(relevant_memories, date_range)
         relevant_memories.sort(key=lambda x: x.get('distance', float('inf')))
 
         return relevant_memories[0:n_results]
