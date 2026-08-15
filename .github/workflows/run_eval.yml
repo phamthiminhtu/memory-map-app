@@ -44,7 +44,9 @@ jobs:
         env:
           LLM_PROVIDER: groq
           GROQ_MEMORY_MAP_APP_API_KEY: ${{ secrets.GROQ_MEMORY_MAP_APP_API_KEY }}
-        run: python -m eval.run_eval
+        run: |
+          mkdir -p eval/results
+          python -m eval.run_eval
 
       - name: Upload eval results
         if: always()
@@ -52,3 +54,4 @@ jobs:
         with:
           name: eval-results-${{ github.sha }}
           path: eval/results/
+          if-no-files-found: warn
