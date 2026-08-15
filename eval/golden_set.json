@@ -33,7 +33,7 @@
     "id": "narrative_03",
     "intent": "narrative",
     "question": "Summarize how the memory-map-app project has progressed across my diary entries.",
-    "must_include": ["memory-map-app", "FastAPI", "CLIP"]
+    "must_include": ["memory-map-app", "FastAPI", "data loaders"]
   },
   {
     "id": "multisource_01",
