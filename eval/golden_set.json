@@ -52,5 +52,17 @@
     "intent": "multi-source",
     "question": "What do I have, in text or images, about museums or photography exhibits?",
     "must_include": ["museum", "photography exhibit", "2026-08-05"]
+  },
+  {
+    "id": "temporal_04",
+    "intent": "temporal",
+    "question": "What did I do on August 26, 2026?",
+    "must_include": ["ingestion script", "ChromaDB", "bugs"]
+  },
+  {
+    "id": "narrative_04",
+    "intent": "narrative",
+    "question": "Tell me the story of my day on August 28, 2026.",
+    "must_include": ["long walk", "golden set", "relative dates"]
   }
 ]
