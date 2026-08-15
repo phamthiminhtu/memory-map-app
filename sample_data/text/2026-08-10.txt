@@ -1,0 +1,3 @@
+August 10, 2026
+
+Went for a morning run in the park before work. The air was cool and it felt good to move. Spent the afternoon debugging a data pipeline that kept silently dropping rows — turned out to be a timezone mismatch. Had dinner with an old friend I hadn't seen in months, we talked for hours about career changes.

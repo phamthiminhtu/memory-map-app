@@ -1,0 +1,54 @@
+name: Run Eval
+
+on:
+  push:
+    branches: [master]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt pytest
+
+      - name: Ingest sample data
+        run: |
+          python scripts/bulk_ingest_image.py \
+            --type all \
+            --full-refresh \
+            --images-dir sample_data/images \
+            --texts-dir sample_data/text \
+            --persist-dir data/chroma_image \
+            --text-persist-dir data/chroma_text
+
+      - name: Run eval
+        env:
+          LLM_PROVIDER: groq
+          GROQ_MEMORY_MAP_APP_API_KEY: ${{ secrets.GROQ_MEMORY_MAP_APP_API_KEY }}
+        run: python -m eval.run_eval
+
+      - name: Upload eval results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-results-${{ github.sha }}
+          path: eval/results/
