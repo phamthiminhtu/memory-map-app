@@ -1,0 +1,3 @@
+July 8, 2026
+
+Rough day at work, a deployment broke production for about an hour. Fixed it with a rollback and wrote a postmortem. Went to bed early, mentally drained.

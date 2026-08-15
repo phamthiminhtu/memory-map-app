@@ -1,0 +1,3 @@
+August 26, 2026
+
+Spent the morning setting up an incremental image ingestion script for the memory-map-app so re-running it only picks up new photos. Found and fixed a couple of nagging bugs in the old ChromaDB wrapper along the way. Satisfying to leave the codebase a bit cleaner than I found it.

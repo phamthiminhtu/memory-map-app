@@ -3,7 +3,7 @@ Hybrid eval: Layer 1 deterministic fact coverage + Layer 2 LLM judge with halluc
 Loads golden_set.json, runs each question through MemoryService, scores with both layers,
 saves results to results/run_<timestamp>.json.
 
-Set LLM_PROVIDER=groq to use Llama via Groq (needs GROQ_API_KEY).
+Set LLM_PROVIDER=groq to use Llama via Groq (needs GROQ_MEMORY_MAP_APP_API_KEY).
 Default provider is Anthropic (needs ANTHROPIC_MEMORY_MAP_APP_API_KEY).
 """
 
@@ -17,7 +17,7 @@ import anthropic
 from groq import Groq
 from backend.services.memory_service import MemoryService
 from backend.utils.constants.anthropic import API_KEY_ENV_VAR as ANTHROPIC_API_KEY_ENV_VAR
-from backend.utils.constants.groq import API_KEY_ENV_VAR as GROQ_API_KEY_ENV_VAR
+from backend.utils.constants.groq import API_KEY_ENV_VAR as GROQ_MEMORY_MAP_APP_API_KEY_ENV_VAR
 from backend.utils.constants.eval import (
     ANTHROPIC_EVAL_MODEL,
     GROQ_EVAL_MODEL,
@@ -62,7 +62,7 @@ def get_api_key(env_var: str) -> str:
 def make_llm_call(provider: str) -> tuple[Callable[[str], str], str]:
     """Returns (call_fn, model_name). call_fn takes a prompt and returns the LLM response text."""
     if provider == "groq":
-        client = Groq(api_key=get_api_key(GROQ_API_KEY_ENV_VAR))
+        client = Groq(api_key=get_api_key(GROQ_MEMORY_MAP_APP_API_KEY_ENV_VAR))
         model = GROQ_EVAL_MODEL
         def call_fn(prompt: str) -> str:
             return client.chat.completions.create(
@@ -192,7 +192,7 @@ def run_eval():
             indent=2,
         )
 
-    print(f"\nSummary: {passed}/{total} passed | avg_coverage={avg_coverage} | avg_llm_score={avg_llm_score}")
+    print(f"\nSummary [{provider} / {model}]: {passed}/{total} passed | avg_coverage={avg_coverage} | avg_llm_score={avg_llm_score}")
     print(f"Results saved to {output_path}")
 
 
