@@ -9,6 +9,7 @@ Default provider is Anthropic (needs ANTHROPIC_MEMORY_MAP_APP_API_KEY).
 
 import json
 import os
+import time
 from datetime import datetime
 from pathlib import Path
 from typing import Callable
@@ -132,8 +133,9 @@ def run_eval():
         golden_set = json.load(f)
 
     results = []
+    groq_rate_limit_delay = 2 if provider == "groq" else 0
 
-    for case in golden_set:
+    for i, case in enumerate(golden_set):
         print(f"Running: {case['id']} ({case['intent']})...")
 
         synthesis = service.synthesize_memories(case["question"], n_results_per_type=10)
@@ -143,6 +145,8 @@ def run_eval():
         coverage_score, keywords_found = fact_coverage(context, case["must_include"])
 
         # Layer 2: LLM judge with hallucination penalty rubric
+        if i > 0 and groq_rate_limit_delay:
+            time.sleep(groq_rate_limit_delay)
         judge_result = llm_judge(call_fn, case["question"], context, case["must_include"])
 
         result = {
