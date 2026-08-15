@@ -12,6 +12,18 @@ A personal memory mapping application that helps you:
 - Use AI clients (Claude Desktop) to retrieve and connect related memories based on your queries.
 - Provide neuroscience insights based on your memories.
 
+## Documentation
+
+| Document | Description |
+|----------|-------------|
+| [Get Started](docs/setup/get_started.md) | Installation and setup guide |
+| [MCP Server Setup](docs/setup/mcp_server.md) | MCP server configuration |
+| [Architecture Alternatives](docs/architecture_designs/design_patterns/architecture_alternatives.md) | Comparison of architectural patterns |
+| [Architecture Patterns Visual](docs/architecture_designs/design_patterns/architecture_patterns_visual.md) | Visual diagrams of architecture patterns |
+| [Agentic Architecture](docs/architecture_designs/mcp/AGENTIC_ARCHITECTURE.md) | MCP agentic flow design |
+| [Decouple Frontend/Backend](docs/architecture_designs/app/decouple_frontend_backend.md) | Frontend/backend decoupling design |
+| [Eval](docs/eval.md) | Evaluation framework and methodology |
+
 ## Implemented features
 
 - Upload and process text and images
