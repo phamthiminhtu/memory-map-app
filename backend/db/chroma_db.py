@@ -92,10 +92,14 @@ class ChromaDB:
         """
         try:
             doc_id = record["doc_id"]
-            text = record.get("text")
-            image = record.get("image")
-            embedding = record.get("embedding")
             metadata = record.get("metadata") or {}
+            embedding = record.get("embedding")
+
+            # backend base_loader uses 'document'; etl base_loader uses 'text'/'image'
+            document = record.get("document")
+            mem_type = metadata.get("type", "")
+            text = record.get("text") or (document if mem_type == "text" else None)
+            image = record.get("image") or (document if mem_type == "image" else None)
 
             # Chroma always needs a document string. Text memories have one;
             # for image-only memories fall back to something human-readable.
@@ -123,7 +127,7 @@ class ChromaDB:
                 documents=[document_text],
                 embeddings=[embedding],
                 ids=[doc_id],
-                metadatas=[metadata]
+                metadatas=[full_metadata]
             )
 
             logger.info(f"Inserted record with ID: {doc_id}")

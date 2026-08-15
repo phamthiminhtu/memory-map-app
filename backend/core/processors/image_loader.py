@@ -9,7 +9,6 @@ import logging
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-logging.disable(logging.CRITICAL)
 
 class ImageDataLoader(BaseDataLoader):
     def __init__(self, vector_db, model_name: str = "ViT-B/32"):

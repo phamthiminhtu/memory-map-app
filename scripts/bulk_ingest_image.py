@@ -21,13 +21,13 @@ import logging
 import sys
 from pathlib import Path
 
-# Make the repo root importable (`db`, `etl`) when this script is run directly.
+# Make the repo root importable when this script is run directly.
 REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from db.chroma_db import ChromaDB
-from etl.data_loaders.image_loader import ImageDataLoader
+from backend.db.chroma_db import ChromaDB
+from backend.core.processors.image_loader import ImageDataLoader
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger("bulk_ingest_image")

@@ -1,6 +1,6 @@
 """Pydantic models for API request/response schemas."""
 
-from .memory import (
+from backend.api.models.memory import (
     AddTextMemoryRequest,
     AddTextMemoryResponse,
     AddImageMemoryResponse,
