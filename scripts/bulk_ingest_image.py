@@ -15,6 +15,7 @@ Usage:
 import argparse
 import hashlib
 import logging
+import re
 import sys
 from pathlib import Path
 
@@ -31,6 +32,20 @@ logger = logging.getLogger("bulk_ingest")
 
 IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".gif", ".bmp", ".webp"}
 TEXT_EXTENSIONS = {".txt", ".md"}
+
+_DATE_STEM_RE = re.compile(r'^(\d{4}-\d{2}-\d{2})(?:_(.+))?$')
+
+
+def parse_filename_metadata(stem: str) -> dict:
+    """Extract date and description from stems like '2024-05-17' or '2024-05-17_sydney_trip'.
+    Returns empty dict if the stem doesn't start with a YYYY-MM-DD date."""
+    match = _DATE_STEM_RE.match(stem)
+    if not match:
+        return {}
+    result = {"date": match.group(1)}
+    if match.group(2):
+        result["description"] = match.group(2).replace("_", " ")
+    return result
 
 
 def compute_image_doc_id(image_path: str) -> str:
@@ -134,7 +149,7 @@ def bulk_ingest_texts(texts_dir: str, persist_dir: str, full_refresh: bool = Fal
             continue
 
         try:
-            metadata = {"title": text_path.stem, "filename": text_path.name, "date": text_path.stem}
+            metadata = {"title": text_path.stem, "filename": text_path.name, **parse_filename_metadata(text_path.stem)}
             loader.save_text_memory(text_path=path_str, metadata=metadata)
             logger.info(f"Ingested: {text_path.name} (doc_id={doc_id})")
             stats["ingested"] += 1
