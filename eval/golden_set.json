@@ -2,8 +2,8 @@
   {
     "id": "temporal_01",
     "intent": "temporal",
-    "question": "What did I do on July 14, 2026?",
-    "must_include": ["hiking", "ridge trail", "2026-07-14"]
+    "question": "What did I do on May 17, 2024?",
+    "must_include": ["sydney", "autumn", "2024-05-17"]
   },
   {
     "id": "temporal_02",

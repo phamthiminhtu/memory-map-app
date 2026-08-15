@@ -14,6 +14,7 @@ from backend.db.chroma_db import ChromaDB
 from backend.core.processors.text_loader import TextDataLoader
 from backend.core.processors.image_loader import ImageDataLoader
 from backend.core.retrievers.memory_retriever import MemoryRetriever
+from backend.utils.text_cleaning import extract_date_range, rerank_by_date
 
 
 @dataclass
@@ -99,7 +100,7 @@ class MemoryService:
             SearchResult object containing matching memories
         """
         # Validate n_results
-        n_results = max(1, min(20, n_results))
+        n_results = max(1, min(100, n_results))
 
         # Search using the retriever
         results = self.retriever.search_memories(query, n_results=n_results)
@@ -291,7 +292,7 @@ class MemoryService:
         Returns:
             SearchResult object containing matching text memories
         """
-        n_results = max(1, min(20, n_results))
+        n_results = max(1, min(100, n_results))
 
         results = self.text_db.search_memories(
             query=query,
@@ -326,7 +327,7 @@ class MemoryService:
         Returns:
             SearchResult object containing matching image memories
         """
-        n_results = max(1, min(20, n_results))
+        n_results = max(1, min(100, n_results))
 
         results = self.image_db.search_memories(
             query=query,
@@ -502,11 +503,16 @@ class MemoryService:
         Returns:
             SynthesisResult with combined and organized memories
         """
+        # Detect date range from query for re-ranking; fetch extra results so
+        # date-relevant entries aren't cut off by the semantic ranking cutoff.
+        date_range = extract_date_range(query)
+        fetch_n = n_results_per_type * 3 if date_range else n_results_per_type
+
         # Search text memories
-        text_results = self.search_text_memories_only(query, n_results_per_type)
+        text_results = self.search_text_memories_only(query, fetch_n)
 
         # Search image memories
-        image_results = self.search_image_memories_only(query, n_results_per_type)
+        image_results = self.search_image_memories_only(query, fetch_n)
 
         # Filter by date if specified
         text_memories = text_results.memories
@@ -515,6 +521,17 @@ class MemoryService:
         if start_date or end_date:
             text_memories = self._filter_by_date_range(text_memories, start_date, end_date)
             image_memories = self._filter_by_date_range(image_memories, start_date, end_date)
+
+        # Apply date-aware re-ranking and trim to requested size
+        if date_range:
+            text_memories = sorted(
+                rerank_by_date(text_memories, date_range),
+                key=lambda m: m.get("distance", float("inf")),
+            )[:n_results_per_type]
+            image_memories = sorted(
+                rerank_by_date(image_memories, date_range),
+                key=lambda m: m.get("distance", float("inf")),
+            )[:n_results_per_type]
 
         # Create timeline - combine and sort by date
         all_memories = text_memories + image_memories
