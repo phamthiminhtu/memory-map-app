@@ -95,11 +95,8 @@ class ChromaDB:
             metadata = record.get("metadata") or {}
             embedding = record.get("embedding")
 
-            # backend base_loader uses 'document'; etl base_loader uses 'text'/'image'
-            document = record.get("document")
-            mem_type = metadata.get("type", "")
-            text = record.get("text") or (document if mem_type == "text" else None)
-            image = record.get("image") or (document if mem_type == "image" else None)
+            text = record.get("text")
+            image = record.get("image")
 
             # Chroma always needs a document string. Text memories have one;
             # for image-only memories fall back to something human-readable.

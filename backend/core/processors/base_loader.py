@@ -52,12 +52,12 @@ class BaseDataLoader(ABC):
             text = None
             image = metadata.get('source')
         
-        # Create structured record
         record = {
-            'metadata': metadata,  # Store full metadata for reference
+            'metadata': metadata,
             'doc_id': doc_id,
-            'document': text if text else image,
-            'embedding': embedding 
+            'text': text,
+            'image': image,
+            'embedding': embedding,
         }
 
         # Save to vector DB
